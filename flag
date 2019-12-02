@@ -21,3 +21,7 @@ gcc -shared -fPIC -o getuid.so getuid.c
 LD_PRELOAD=./getuid.so ./level13
 flag=2A31L79asukciNyi8uppkEuSx
 level14
+There is no file in the home, and could not find anything to exploit except the binary getflag situed in /bin/getflag
+Using gdb to explore the binary. If we execute it with gdb there is a verification using function ptrace to eject us.
+disassembling main we can see that there is a lot (15) of call of ft_des and then fputs, if we jump to one of them (directly after a the jump) we can see that if print a flag. So we jump to the last one (0x08048de5) and we get the flag 7QiHafiNa3HVozsaXkawuYrTstxbpABHD8CPnHJ.
+We can connect to flag14 with it and getflag the same as the password 7QiHafiNa3HVozsaXkawuYrTstxbpABHD8CPnHJ
