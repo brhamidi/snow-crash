@@ -1,0 +1,6 @@
+In root directory there is a script perl that seem to run on port 4747.
+The script seem to take a param x and then print it with echo.
+If we use curl on localhost:4747 we only got an empty line.
+We need to set the argument x.
+curl localhost:4747?x=\`getflag\`
+As the script use echo to print x we will replace x with `getflag` using `` will execute the binary getflag and then echo will print the result of it.

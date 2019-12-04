@@ -1,0 +1,8 @@
+At root we got a pcap file.
+pcap files contain a packet captured.
+It can be read by software like wireshark, or online on cloudshark
+Exploring the file there is an analysis tool "follow stream"
+with that we can see that the user when asked for password put "ft_wandr...NDRel.L0L"
+Looking through the packet sent, we can see that the "." sent are 7f equal to del
+So the password is ft_wandr(del)(del)(del)NDRel(del)L0L = ft_waNDReL0L
+we can now connect and getflag

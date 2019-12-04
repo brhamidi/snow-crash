@@ -1,0 +1,7 @@
+Using `find / -user flag05 2>/dev/null`
+There is only one file "/usr/sbin/openarenaserver"
+It is a bash script that will execute as command everything in the directory /opt/openarenaserver/ and then remove them.
+When trying to add file in /opt/openarenaserver it seem that they are removed every two minutes. So it seem like there is a cron.
+We create a file containing the command we want to execute and redirect the result to a file in tmp, as we need to read it to get the flag. Because when the script is executed by flag05 we can't see the result.
+echo "getflag > /tmp/flag05" > /opt/openarenaserver/flag
+After two minutes we can get the flag with "cat /tmp/flag05"

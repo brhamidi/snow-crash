@@ -1,0 +1,6 @@
+In root directory there is a binary and php file.
+In the php file we can see that it need two arguments, the first is the name of a file and the second is not used.
+We can see that is use the function preg_replace with the option /e that is deprecated, it should not be used for security reason. /e option allows to use PHP code within the regular expression. So for preg_replace("/(\[x (.*)\])/e", "y(\"\\2\")", $a) as "$a" contain the file injected as first argument, it will replace "\2" to string containing the result of getflag printed by a function using system(function).
+
+echo '[x {${system(getflag)}}]' > /tmp/gf
+./level06 /tmp/gf

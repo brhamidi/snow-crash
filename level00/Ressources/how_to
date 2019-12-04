@@ -1,0 +1,8 @@
+Seeing video, seem like there is only one file that can be run by flag00
+So we use the command find to find this file.
+`find / -user flag00 2> /dev/null`
+We now got a file. /usr/sbin/john
+This file contain the string "cdiiddwpgswtgt"
+This is not the password, so we need to decrypt it.
+Trying this code on the website dcode, this seem to be a code ceasar with a rotation of 15 because it has been transformed to "nottoohardhere"
+We can now connect to flag00 and use command getflag

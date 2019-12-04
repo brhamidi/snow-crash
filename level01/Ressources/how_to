@@ -1,0 +1,13 @@
+Looking for password on level00 we had found that in /etc/passwd there is a crypted password shown for flag01.
+Using the software "John the ripper" we can decrypt it and get the password "abcdefg" and connect to flag01 to get the flag.
+
+Download "John the ripper" at https://www.openwall.com/john/k/john-1.9.0.tar.gz
+tar -xf john-1.9.0\(1\).tar.gz
+cd john-1.9.0/src
+make macosx-x86-64
+cd ../run
+create a file with the password found in /etc/passwd
+
+echo "flag01:42hDRfypTqqnw:3001:3001::/home/flag/flag01:/bin/bash" > passwd
+./john passwd
+We now got the password "abcdefg"

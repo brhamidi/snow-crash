@@ -1,0 +1,11 @@
+There is a binary in root directory.
+When executing it is say exploit me.
+Using gdb and disass main
+There is a call to system. Add a break point before execution of it to check argument.
+system try to execute "/usr/bin/env echo Exploit me"
+The binary is supposed to use it own env of flag03, but as it add /user/bin/env before execute "echo Exploit me" it will take env of level03
+Knowing that we can subsitute echo binary to getflag and get the flag instead to print "exploit me"
+
+ln -s /bin/getflag /tmp/echo
+export PATH=/tmp:$PATH
+~/level03
