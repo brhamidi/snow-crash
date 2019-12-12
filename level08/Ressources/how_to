@@ -2,3 +2,6 @@ Going through gdb we can see that the binary check the name of the file with the
 We create a symbolique link to change the name of the file that we ask the binary to read so it does not contain any "token" in the name.
 
 ln -s ~/token /tmp/flag
+quif5eloekouj29ke0vouxean
+
+We now got the password to connect to flag08 and getflag.
