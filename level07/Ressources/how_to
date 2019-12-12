@@ -1,0 +1,5 @@
+Going though gdb we can see that the binary get the env and then create a string with asprintf to get "/bin/echo " + string found in LOGNAME in the environnment.
+Then it use the string created with the function system. Knowing that, we will change the LOGNAME with random string + "; getflag".
+So "system" will use echo and the getflag.
+
+export LOGNAME="hello; getflag"
