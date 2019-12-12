@@ -1,0 +1,17 @@
+Program need a file and an address to work.
+If we use the file "token" it say that we don't have access.
+Looking through gdb we can see that the binary use access and open.
+If the access does not work it jump to the end of the program.
+"Access" check if the read UID (level10) can read it and then use open to create a stream and read it.
+But as open use the suid of the program (flag10).
+So the program can't "access" the file "token" but it can "open" it.
+If the program can access it, it will send it to the address on the port 6969.
+As it use two different functions to check it can read and then read it, we can use this delay to change the file and bypass this protection.
+For that we will create a bash program that will change a symbolique link to a file that level10 can read and then to the "token" file.
+When the bash program is running we launch the level10 program with the symbolic link and address of the VM.
+On an other window we open nc -l 6969 that will listen on the port and read that the level10 program send.
+May need to launch multiple time to catch the right timing.
+Use nc.sh and ln.sh in background and use "~/level10 /tmp/l10/flag [host]".
+
+Password is woupa2yuojeeaaed06riuj63c
+We can now connect to flag10 and getflag.
