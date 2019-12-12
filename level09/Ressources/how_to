@@ -1,0 +1,4 @@
+Binary Take an argument and seem to crypt it, if we enter aaaa we will get abcd. If we try to use it with the file token
+./level09 `cat token`
+It does not seem to work, so the token seem to be the password but crypted.
+We create a program that will decrypt. The program read the file token and for each character will substract 1 more for each already read character, and print it.
