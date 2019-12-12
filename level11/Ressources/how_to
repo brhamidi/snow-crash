@@ -1,0 +1,5 @@
+In root directory show that there is a server running on port 5151, it use popen to crypt the password.
+"popen" is like "system" function it execute the command we pass.
+When popen is used it concat "echo" with the password we enter.
+Knowing that we can add "; getflag > /tmp/flag" to the end of the password to make popen redirect the the result of getflag to a file in /tmp that we can later read.
+We use "nc localhost 5151" to connect to the server.
