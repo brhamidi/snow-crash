@@ -1,0 +1,4 @@
+Going through gdb we can see that the binary check the name of the file with the function strstr to verify if the name is not token otherwise it say it can not access it even if it could.
+We create a symbolique link to change the name of the file that we ask the binary to read so it does not contain any "token" in the name.
+
+ln -s ~/token /tmp/flag
