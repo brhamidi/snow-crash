@@ -1,0 +1,9 @@
+When executing binary it say "UID 2013 started us but we we expect 4242".
+Going through gdb, we can see that it check the uid with getuid and if it's the right one it will use the function ft_des and then printf to print something.
+We will try to inject a function that will return 4242 instead of 2013 to see what happen.
+To inject a function to this binary we will need to create a copy of it because we can't inject a function into a suid binary (for security reason).
+We create a new function getuid that will return 4242.
+compile gcc -shared -fPIC -o getuid.so getuid.c,
+and then execute it with LD_PRELOAD=./getuid.so ./level13
+We now got the flag by injecting a function to get the right uid.
+We could have get the flag with out injecting but using gdb and jumping directly to bypass the condition.
