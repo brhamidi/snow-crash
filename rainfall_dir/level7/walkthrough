@@ -1,0 +1,10 @@
+This binary does need two arguments to work.
+If the first argument is too long it will segfault.
+When we look through gdb, it segfault on the second strcpy.
+When we watch the argument of this strcpy, we can see that the first argument is a part of the first argument of the binary (21-24) and the second one is the second argument of the binary.
+With objdump -d we have seen that there is a function "m" that use printf and print the flag.
+Knowing that we will replace the address of the function puts (shared library) with the address of m.
+To do that we use the second strcpy and place the address of m instead of the address of puts.
+First argument is 20 random chars and then the address where it look for puts
+Second argument is the address of "m"
+python -c 'print "a"*20 + "\x28\x99\x04\x08"'> /tmp/lv7 && python -c 'print "\xf4\x84\x04\x08"'> /tmp/lv7b && ~/level7 `cat /tmp/lv7` `cat /tmp/lv7b`
