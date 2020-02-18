@@ -1,6 +1,6 @@
 This Binary seem to need one argument to work as it print a new line in this condition.
 Using gdb and ghidra to explore the binary, we can see that binary does use fopen on "/home/user/end/.pass"
-It then read 65 bits from the fd.
+It then read 66 bits from the file stream.
 With this string it will then put a \0 on the bit number 'atoi on the binary argument'.
 It then compare the string and the argument.
 If it match it will start a shell, otherwise it will print the rest of the file(nothing).
