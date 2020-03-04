@@ -1,9 +1,18 @@
-This Binary seem to need one argument to work as it print a new line in this condition.
-Using gdb and ghidra to explore the binary, we can see that binary does use fopen on "/home/user/end/.pass"
-It then read 66 bits from the file stream.
-With this string it will then put a \0 on the bit number 'atoi on the binary argument'.
-It then compare the string and the argument.
-If it match it will start a shell, otherwise it will print the rest of the file(nothing).
-As we don't know what the flag is and that the argument have to match atoi AND the flag, we will make as argument an empty string "".
-With an empty string, it contain only "\0" so atoi will return 0. So it will replace the first bit with '\0' and will compare "" with ""
-As it match it will start a shell and we can now get the flag with "cat /home/user/end/.pass".
+This binary start a print "(nil), (nil)", as we use Ghidra to inspect the binary.
+It seem like it does use command like "auth", "service", "reset" and "login".
+Command auth and service does need an argument.
+When we use auth or service it does change the printing with adress.
+Those address are the address of string containing argument of each argument respectively.
+If we enter auth first, service will be 16 bits after auth no matter the length of auth.
+If we inverse and enter service first, auth will be after service but it will depend of the argument of service.
+reset command seem to free the address but it does not matter for us.
+login command will start a shell with system.
+If we try to use the command login it does not do anything expect print "Password:".
+As we inspect it with gdb we can see that before starting shell it does a check.
+If the 32th bits after the start of auth is not equal to 0.
+Problem is that he length of auth is restricted.
+But as service can follow auth address, we will enter auth and then service.
+As the comparison is only for the 32th bits it does not matter what inbetween.
+So we use "auth 123" and then "service long enough to match 32th bits".
+With this, when the binary will compare the 32th bits it will get a non null number, execute the function system and so, start a shell
+We can now get the flag with cat /home/user/level9/.pass

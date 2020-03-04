@@ -1,0 +1,5 @@
+When executing binary it segfault, it need an argument to work.
+Using gdb we can see that it use atoi and then compare it to 0x1a7 (423).
+If we enter 423 as argument it open a shell with level1 permission.
+We can now use cat to print the flag.
+cat /home/user/level1/.pass

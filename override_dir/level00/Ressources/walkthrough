@@ -1,0 +1,4 @@
+When executing binary, it ask for a password.
+Looking through gdb we can see that it use scanf for a number and then compare it to 0x149c (5276).
+If we start the binary and put 5276 as password, it will open a shell.
+We can now get the flag with 'cat /home/users/level01/.pass'

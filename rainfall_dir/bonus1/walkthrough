@@ -1,0 +1,16 @@
+The binary need atleast one argument to work, otherwise it will segfault.
+As we can't see anything when we execute the binary we go through ghidra.
+We can see that it use two arguments.
+It does an atoi on the first argument (we call this number F).
+It then use this number if it is lower than 10 and then use memcpy to copy the second argument into a char table of 40.
+Then it compare F to 1464814662 (or equal to "FLOW") and if it is equal it start a shell.
+As F have to be lower than 10 and equal to 1464814662 it is a bit confusing.
+F is strocked after the char table of 40, so if we could write more than 40 bits with memcpy it would overflow and overwrite F with what we need.
+The third argument of memcpy that is used to be the number of bits we want to be written is F * 4.
+As we need to write 44 bits to overwrite F we would need F to be equal to 11 but as seen earlier it has to be lower than 10.
+As we know that bytes somehow "cycle" when it overflow we will use this to information to F be under 10 and F * 4 equal to 44 (it does not need to be exactly equal to 44 but has to not be to high as it may reach private memory).
+Knowing those information F as to be equal to -2147483637 because it is under 10 and if we multiply it by 4 we got 44
+Thanks to F we will be able to overwrite F with memcpy.
+The second argument now have to be 40 random bits and then 4 bits equal to 1464814662 or "FLOW".
+With those two argument the binary will start a shell and we can get the flag.
+cat /home/user/bonus2/.pass

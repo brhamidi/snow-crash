@@ -1,0 +1,8 @@
+This binary need an argument to run and it write "Nope".
+Using "objdump -d" we can see that there is a function m and n, function n make a call with system, and m with puts.
+In main function there is a call to a function from a var, it use a pointer to function.
+In the main there is two calls to malloc, one for 64 and another one for 4 and then a call to strcpy.
+If we test to put an argument to long it will segfault for 73 char, with gdb we can see that the second malloc is positionned 72 char after the first one.
+Knowing that we will use the strcpy to overflow the first buffer and ecrase the pointer of function and place the address of "n" instead of "m".
+python -c 'print "a"*72 + "\x54\x84\x04\x08"'> /tmp/lvl6 && ~/level6 `cat /tmp/lvl6`
+The call to "n" will print the flag.

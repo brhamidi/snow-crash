@@ -1,0 +1,6 @@
+Exploring the binary with gdb. Binary make a compare a value to 64 and if it's equal it will start a shell. We can see that it use fgets (a protected version of gets) so we can not make a buffer overflow. But it use printf with a var as first argument, we can use this to exploit the binary.
+We need to change the value compared to 64 to fit the condition and start a shell, using "objdump -D" on the binary we can see that the var compared is "m" is the bss section.
+To exploit with printf we will place "AAAA" and many "%x". We will then count how many address there is before 414141 the hex value for "AAAA". As we got this information we will use "%n" to change the value of the var passed at the address, but instead of AAAA we will pass the address of "m", the parameter %n will change the value with the number of charater printed before "%n", so we have to make it print 64 char before.
+python -c 'print "\x8c\x98\x04\x08" + "%x"*3 + "a"*41 + "%n"'> /tmp/lvl3 && cat /tmp/lvl3 - | ~/level3
+Address of m + "%x" * 3 (move the stack so the next address is m) + "a" * 41 => so the %n will place 64 (number of char before the %n) in m and match the condition to start a shell by itself. 64 = 4 + 3 + 8 + 8 + 41.
+cat /home/user/level4/.pass

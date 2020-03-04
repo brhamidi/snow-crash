@@ -1,0 +1,10 @@
+Looking through gdb and ghidra to understand what happend when we start the binary.
+We can see that the binary need atleast one argument to work.
+If we try use the binary with one argument, there is still nothing that happen.
+If the argument is long enough it segfault.
+Looking futher we see that the binary is supposed to call a pointer on function but we ecrased the address with our argument.
+So, it seem like when it call the function setAnnotation it will overflow if the argument is too long  and change the address of the pointer of pointer on function.
+Knowing that we will inject a shellcode and change the address of the pointer of pointer on function to the start of the shellcode.
+The new address will be the address of the start of shellcode.
+As the memory may vary a bit we use a script that will try out the different possibility for the first address bit.
+When executed the shellcode will start a shell, we can now use "cat /home/user/bonus0/.pass" to get the flag

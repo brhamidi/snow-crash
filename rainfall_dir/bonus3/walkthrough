@@ -1,0 +1,9 @@
+This Binary seem to need one argument to work as it print a new line in this condition.
+Using gdb and ghidra to explore the binary, we can see that binary does use fopen on "/home/user/end/.pass"
+It then read 66 bits from the file stream.
+With this string it will then put a \0 on the bit number 'atoi on the binary argument'.
+It then compare the string and the argument.
+If it match it will start a shell, otherwise it will print the rest of the file(nothing).
+As we don't know what the flag is and that the argument have to match atoi AND the flag, we will make as argument an empty string "".
+With an empty string, it contain only "\0" so atoi will return 0. So it will replace the first bit with '\0' and will compare "" with ""
+As it match it will start a shell and we can now get the flag with "cat /home/user/end/.pass".

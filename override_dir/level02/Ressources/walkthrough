@@ -1,0 +1,16 @@
+When we execute the binary it ask for a username and then for a password.
+If we look through ghidra we can see that it use fopen to get file stream of "/home/users/level03/.pass" and the the flag with fread.
+It then compare it to the password, if the two are equal it start a shell, otherwise it use printf to print directly the username (as first argument), knowing that it use the string containing the uername we can exploit this to print the flag.
+To start, we will inject for user "AAAA" and then many %p to see where we find the address "0x41414141".
+We find it but and we see that the binary as been compilated as 64-bit, that mean the address are 8 bytes.
+As we need address of string containing the flag we look through gdb to get it.
+We have the change the file that fopen try to open to then see the address used by fread.
+We find that 0x7fffffffe510 contain the flag, but the problem is that the address is 6 bytes long as the two first bytes are 0x00. The problem is that we cant inject it at the start of the because of the two byts that have to be 0x00, we can either inject it at the end of username of in password.
+As password is easier to use we will use that.
+So we need the address of password so we put many %p as username and AAAAAAAA as password.
+We can see that the 8th address is the one of password.
+So we will print the 8th address as a string ("%8$s").
+Username will be "%8$s" + filling char for the fread of 100.
+And then the password (testing byte from 0x00 to 0xff as the address may vary) + "\xe5\xff\xff\xff\x7f".
+To do that we use a bash script.
+When using script we press enter to try the next address, it will print the flag when at the right address.

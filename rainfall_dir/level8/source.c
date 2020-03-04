@@ -1,25 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 
-int main(int ac, char **av)
+int main()
 {
-        FILE *fd;
-        char flag[67];
-        char rest[66];
-        int     i;
+	char *auth = 0;
+	char *service = 0;
+	char str[129];
 
-        if (ac != 2)
-                return (0);
-        rest[0] = 0;
-        fd = fopen("/home/user/end/.pass", "r");
-        fread(flag, 66, 1, fd);
-        fread(rest, 65, 1, fd);
-        i = atoi(av[1]);
-        flag[i] = 0;
-        if (!strcmp(flag, av[1]))
-                execl("/bin/sh", "sh", NULL);
-        else
-                puts(rest);
-        return (0);
+	str[128] = 0;
+	printf("%p, %p \n",auth,service);
+	while (fgets(str, 128, stdin))
+	{
+		if (!strncmp(str, "auth ", 5)) // use auth first
+		{
+			if (strlen(str) < 30)
+			{
+				auth = strndup(&str[5], 11); // 0-12
+			}
+			else
+				auth = calloc(11, 1);
+		}
+		else if (!strncmp(str, "service ", 8)) // and then service 
+		{
+			service = strdup(&str[8]); // 16 - xx, must be long enough to match the login condition
+		}
+		else if (!strncmp(str, "reset\n", 6))
+		{
+			free(auth);
+			auth = 0;
+			free(service);
+			service = 0;
+		}
+		else if (!strncmp(str, "login\n", 6))
+		{
+			if (auth && auth[32]) // to be able to start shell thanks to service's address following auth's one
+				system("/bin/sh");
+			else
+				fwrite("Password:\n",1,10,stdout);
+		}
+		printf("%p, %p \n",auth,service);
+	}
 }

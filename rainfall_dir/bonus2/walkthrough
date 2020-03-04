@@ -1,0 +1,11 @@
+The binary does need two arguments to work, and greet the first argument.
+If we try different length for argument, we can see that if the first one is too long, the second will follow the first after 40 char.
+If the two are long enough it will segfault.
+Looking through gdb we can see that the segfault appear in the function greetuser when it is supposed to return in the main function, instead the address is corrupted and half of it is the a part of the second argument.
+So, we can inject a shellcode, but be can't jump to it because the string is not long enough to ecrase all of the address of return.
+In ghidra we can see that binary does a getenv("LANG") and does different greeting for different language.
+For 'fi' it does "Hyvää päivää", for 'nl' "Goedemiddag!" and for the others it foes "Hello".
+As for fi and nl the greet is longer than the default one, we can use one of those to get a longer string and being able to ecrase all of the address of return.
+So we change the language in env with "export LANG=nl" and we will be able to execute the shellcode.
+The script will inject as first argument the shellcode plus enough char to fill, and as second argument char to fill and placed to ecrase the address of return of the function, we will try different last bit of the address to match the start of the shellcode.
+We can now get the flag with "cat /home/user/bonus3/.pass"

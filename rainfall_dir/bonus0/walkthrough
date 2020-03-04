@@ -1,0 +1,20 @@
+The binary expect two entry and then print the two with a space between them.
+If the first entry is too long, it will print the first entry, directly followed by the second and the print again the second with a space beforehand.
+If the two are too long the binary segfault.
+Examining the binary with ghidra we can see that the main function got a char table of 54, it call function to get entries and print them.
+The function that get the entries will get the two entries in each table char of 20 and then use strcat and store it to the main table char to print and leave.
+As the two are following themself in memory, we will use this information to make the exploit.
+As first entry we will inject the start of the shellcode, followed by the end of the shellcode for the second entry, and then we will need to inject the address start of the shellcode to jump to it at the end of the function main thanks to the overflow of the buffer.
+As we will use a file to inject it to the binary we have to complete some condition.
+As it read on stdin 4096 bits we have to fill the first argument with char after the start of the shellcode,
+plus to match the start of the shellcode we will have to test with a script the different address.
+
+FILE:
+-START OF SHELLCODE(20 bits)\n-4075 random bits-END OF SHELLCODE-address of the start of shellcode-RANDOM FILLER BITS
+
+The string in the main function will be composed of:
+SHELLCODE - address of the start of shellcode - some random bits - end of shellcode - (overflow) address of the start of shellcode - some random bits
+
+We use the script to try the differents address to match the start of the shellcode.
+We press enter untill it match.
+We can now get the flag with "cat /home/user/bonus1/.pass"

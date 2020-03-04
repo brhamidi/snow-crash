@@ -1,0 +1,12 @@
+Using gdb we can see that the program use gets that is unsafe because prone to buffer overflow exploit.
+The function that use gets is the function main that reserve 80 bites.
+With "objdump -d level1" we can see that there is a function "run" but not called anywhere (address 0x08048444).
+With gdb we can see that the function run start a shell with a call to the function "system".
+Knowing that we will make a bufferoverlow exploit.
+We create a string that is 76 char and then the address of the function "run".
+When executing the binary and injecting the string we created we will replace the address of the function supposed to resume at the end of the the current function (after the call to return in function main), by the function "run".
+The function "run" will start shell and we can get the flag using cat.
+
+To create the string: python -c 'print "a"*76 + "\x44\x84\x04\x08"' > /tmp/lv1
+To execute binary: cat /tmp/lv1 - | ./level1
+To get the flag: cat /home/user/level2/.pass

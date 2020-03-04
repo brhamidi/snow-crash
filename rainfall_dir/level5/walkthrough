@@ -1,0 +1,8 @@
+Looking through "objdump -d" on the binary we can see that there is a function "o" with a call to system, but called nowhere.
+There is the function printf and as the previous level, it use a string retrived from fgets as first parameter. We will use as the previous level, printf, to be able to jump to the function "o" but instead to change the address for the return, we have to change the address found for exit, exit is in PLT (procedure linkage table) it is used to find a function dynamicly. When "exit" is called it will jump and read a pointer with the location of the function exit. Thanks to this, we will be able to jump to the function "o" instead.
+We will use printf and %n to replace the address of "exit" with the address of the function "o".
+To find the address we use gdb, "disass exit" and we find
+"0x080483d0 <+0>:	jmp    *0x8049838"
+at the address 0x8049838 we will place 0x080484aa (the start of the function "o" (break o => Breakpoint 1 at 0x80484aa)). We will print as much space character to fill and get as much as the addres of "o".
+python -c 'print "\x38\x98\x04\x08" + "%x"*2 + "%134513819u%n"'> /tmp/lvl5 && cat /tmp/lvl5 - | ~/level5
+We can now get the flag with "cat /home/user/level6/.pass"
